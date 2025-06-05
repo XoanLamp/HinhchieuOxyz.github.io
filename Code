@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Hình chiếu trong Oxyz</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            color: #ffcc00;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .input-row input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .input-row input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #ffcc00;
+            color: #ffcc00;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #ffcc00;
+            color: #1a2a6c;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: #ffd633;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result h3 {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .result p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .coordinates {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .explanation h2 {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .explanation p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TÍNH HÌNH CHIẾU TRONG OXYZ</h1>
+            <p class="subtitle">Hình chiếu điểm lên đường thẳng và mặt phẳng trong hệ tọa độ Oxyz</p>
+        </header>
+        
+        <div class="card-container">
+            <!-- Hình chiếu lên đường thẳng -->
+            <div class="card">
+                <h2>HÌNH CHIẾU LÊN ĐƯỜNG THẲNG</h2>
+                
+                <div class="input-group">
+                    <label>Điểm cần chiếu M(x, y, z):</label>
+                    <div class="input-row">
+                        <input type="number" id="point-x" placeholder="x" value="1">
+                        <input type="number" id="point-y" placeholder="y" value="2">
+                        <input type="number" id="point-z" placeholder="z" value="3">
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="param">Dạng tham số</div>
+                    <div class="tab" data-tab="canonical">Dạng chính tắc</div>
+                </div>
+                
+                <div class="tab-content active" id="param-content">
+                    <div class="input-group">
+                        <label>Phương trình tham số:</label>
+                        <div class="input-row">
+                            <input type="number" id="line-x0" placeholder="x₀" value="0">
+                            <span style="align-self: center">+</span>
+                            <input type="number" id="line-a" placeholder="a" value="1">
+                            <span style="align-self: center">t</span>
+                        </div>
+                        <div class="input-row">
+                            <input type="number" id="line-y0" placeholder="y₀" value="0">
+                            <span style="align-self: center">+</span>
+                            <input type="number" id="line-b" placeholder="b" value="2">
+                            <span style="align-self: center">t</span>
+                        </div>
+                        <div class="input-row">
+                            <input type="number" id="line-z0" placeholder="z₀" value="0">
+                            <span style="align-self: center">+</span>
+                            <input type="number" id="line-c" placeholder="c" value="3">
+                            <span style="align-self: center">t</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="canonical-content">
+                    <div class="input-group">
+                        <label>Phương trình chính tắc:</label>
+                        <div class="input-row">
+                            <span style="align-self: center">(x -</span>
+                            <input type="number" id="canon-x0" placeholder="x₀" value="0">
+                            <span style="align-self: center">) /</span>
+                            <input type="number" id="canon-a" placeholder="a" value="1">
+                        </div>
+                        <div class="input-row">
+                            <span style="align-self: center">(y -</span>
+                            <input type="number" id="canon-y0" placeholder="y₀" value="0">
+                            <span style="align-self: center">) /</span>
+                            <input type="number" id="canon-b" placeholder="b" value="2">
+                        </div>
+                        <div class="input-row">
+                            <span style="align-self: center">(z -</span>
+                            <input type="number" id="canon-z0" placeholder="z₀" value="0">
+                            <span style="align-self: center">) /</span>
+                            <input type="number" id="canon-c" placeholder="c" value="3">
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="calculate-line" class="btn">TÍNH HÌNH CHIẾU</button>
+                
+                <div id="line-result" class="result">
+                    <h3>KẾT QUẢ</h3>
+                    <p>Hình chiếu của điểm M lên đường thẳng:</p>
+                    <div id="line-coordinates" class="coordinates">H(0.000, 0.000, 0.000)</div>
+                </div>
+            </div>
+            
+            <!-- Hình chiếu lên mặt phẳng -->
+            <div class="card">
+                <h2>HÌNH CHIẾU LÊN MẶT PHẲNG</h2>
+                
+                <div class="input-group">
+                    <label>Điểm cần chiếu M(x, y, z):</label>
+                    <div class="input-row">
+                        <input type="number" id="plane-point-x" placeholder="x" value="1">
+                        <input type="number" id="plane-point-y" placeholder="y" value="2">
+                        <input type="number" id="plane-point-z" placeholder="z" value="3">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Phương trình mặt phẳng: Ax + By + Cz + D = 0</label>
+                    <div class="input-row">
+                        <input type="number" id="plane-a" placeholder="A" value="1">
+                        <input type="number" id="plane-b" placeholder="B" value="1">
+                        <input type="number" id="plane-c" placeholder="C" value="1">
+                        <input type="number" id="plane-d" placeholder="D" value="1">
+                    </div>
+                </div>
+                
+                <button id="calculate-plane" class="btn">TÍNH HÌNH CHIẾU</button>
+                
+                <div id="plane-result" class="result">
+                    <h3>KẾT QUẢ</h3>
+                    <p>Hình chiếu của điểm M lên mặt phẳng:</p>
+                    <div id="plane-coordinates" class="coordinates">H(0.000, 0.000, 0.000)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h2>CÔNG THỨC TÍNH TOÁN</h2>
+            
+            <p><strong>Hình chiếu của điểm lên đường thẳng:</strong></p>
+            <div class="formula">
+                Cho điểm M(x₀, y₀, z₀) và đường thẳng d: x = x₁ + a·t, y = y₁ + b·t, z = z₁ + c·t<br>
+                Hình chiếu H của M lên d: t = [a(x₀ - x₁) + b(y₀ - y₁) + c(z₀ - z₁)] / (a² + b² + c²)<br>
+                Tọa độ H: (x₁ + a·t, y₁ + b·t, z₁ + c·t)
+            </div>
+            
+            <p><strong>Hình chiếu của điểm lên mặt phẳng:</strong></p>
+            <div class="formula">
+                Cho điểm M(x₀, y₀, z₀) và mặt phẳng (P): Ax + By + Cz + D = 0<br>
+                Khoảng cách: t = (A·x₀ + B·y₀ + C·z₀ + D) / (A² + B² + C²)<br>
+                Tọa độ hình chiếu H: (x₀ - A·t, y₀ - B·t, z₀ - C·t)
+            </div>
+        </div>
+        
+        <footer>
+            <p>Chương trình tính toán hình chiếu trong không gian Oxyz | Toán học ứng dụng</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabType = tab.getAttribute('data-tab');
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                // Show corresponding content
+                document.getElementById(`${tabType}-content`).classList.add('active');
+            });
+        });
+        
+        // Calculate projection on line
+        document.getElementById('calculate-line').addEventListener('click', () => {
+            // Get point coordinates
+            const x = parseFloat(document.getElementById('point-x').value);
+            const y = parseFloat(document.getElementById('point-y').value);
+            const z = parseFloat(document.getElementById('point-z').value);
+            
+            // Check which tab is active
+            const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+            
+            let x0, y0, z0, a, b, c;
+            
+            if (activeTab === 'param') {
+                // Parametric form
+                x0 = parseFloat(document.getElementById('line-x0').value);
+                y0 = parseFloat(document.getElementById('line-y0').value);
+                z0 = parseFloat(document.getElementById('line-z0').value);
+                a = parseFloat(document.getElementById('line-a').value);
+                b = parseFloat(document.getElementById('line-b').value);
+                c = parseFloat(document.getElementById('line-c').value);
+            } else {
+                // Canonical form
+                x0 = parseFloat(document.getElementById('canon-x0').value);
+                y0 = parseFloat(document.getElementById('canon-y0').value);
+                z0 = parseFloat(document.getElementById('canon-z0').value);
+                a = parseFloat(document.getElementById('canon-a').value);
+                b = parseFloat(document.getElementById('canon-b').value);
+                c = parseFloat(document.getElementById('canon-c').value);
+            }
+            
+            // Calculate projection
+            const numerator = a*(x - x0) + b*(y - y0) + c*(z - z0);
+            const denominator = a*a + b*b + c*c;
+            
+            if (denominator === 0) {
+                alert("Vector chỉ phương không hợp lệ (a, b, c không được đồng thời bằng 0)");
+                return;
+            }
+            
+            const t = numerator / denominator;
+            const hx = x0 + a*t;
+            const hy = y0 + b*t;
+            const hz = z0 + c*t;
+            
+            // Display result
+            document.getElementById('line-coordinates').textContent = 
+                `H(${hx.toFixed(3)}, ${hy.toFixed(3)}, ${hz.toFixed(3)})`;
+            document.getElementById('line-result').style.display = 'block';
+        });
+        
+        // Calculate projection on plane
+        document.getElementById('calculate-plane').addEventListener('click', () => {
+            // Get point coordinates
+            const x = parseFloat(document.getElementById('plane-point-x').value);
+            const y = parseFloat(document.getElementById('plane-point-y').value);
+            const z = parseFloat(document.getElementById('plane-point-z').value);
+            
+            // Get plane coefficients
+            const A = parseFloat(document.getElementById('plane-a').value);
+            const B = parseFloat(document.getElementById('plane-b').value);
+            const C = parseFloat(document.getElementById('plane-c').value);
+            const D = parseFloat(document.getElementById('plane-d').value);
+            
+            // Calculate projection
+            const numerator = A*x + B*y + C*z + D;
+            const denominator = A*A + B*B + C*C;
+            
+            if (denominator === 0) {
+                alert("Vector pháp tuyến không hợp lệ (A, B, C không được đồng thời bằng 0)");
+                return;
+            }
+            
+            const t = numerator / denominator;
+            const hx = x - A*t;
+            const hy = y - B*t;
+            const hz = z - C*t;
+            
+            // Display result
+            document.getElementById('plane-coordinates').textContent = 
+                `H(${hx.toFixed(3)}, ${hy.toFixed(3)}, ${hz.toFixed(3)})`;
+            document.getElementById('plane-result').style.display = 'block';
+        });
+        
+        // Initialize with some calculations
+        window.addEventListener('load', () => {
+            document.getElementById('calculate-line').click();
+            document.getElementById('calculate-plane').click();
+        });
+    </script>
+</body>
+</html>
